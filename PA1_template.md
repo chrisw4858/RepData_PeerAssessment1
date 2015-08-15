@@ -180,7 +180,7 @@ head(activityPerDayImputed)
 ## 5 2012-10-05 13294.00
 ## 6 2012-10-06 15420.00
 ```
-We see that 10/1/2010 now has a non-zero value for the number of steps  
+We see that 10/1/2012 now has a non-zero value for the number of steps  
 
 Examining the histogram of the number of steps per day shows that there are far fewer days with zero steps (but some do remain). Visually, it appears that there is a greater number of days with more than 10,000 steps.
 
