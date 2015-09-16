@@ -12,7 +12,14 @@ Peer Assignment 1
 
 ## Loading and preprocessing the data
 
-First load the necessary packages:
+First, set the knitr options to display R code
+
+```r
+library(knitr)
+opts_chunk$set(echo = TRUE, echo=TRUE)
+```
+
+Next load the necessary packages:
 
 ```r
 library(dplyr)
@@ -33,13 +40,46 @@ activity = read.csv("activity.csv", stringsAsFactors = FALSE,
 
 ## What is mean total number of steps taken per day?
 
-Start off by calculating the mean number of steps taken each day, while ignoring any NA values.  
+The instructions says 'you can ignore the missing values in the dataset' in instructions, so no attempt will be made to modify NAs. However, we will look at the distribution of NAs to see if some treatments make more sense than others.
+
+Taking at look at the distribution of NAs in the dataset:
+
+```r
+activity %>% filter(is.na(steps)) %>% count(date)
+```
+
+```
+## Source: local data frame [8 x 2]
+## 
+##         date   n
+## 1 2012-10-01 288
+## 2 2012-10-08 288
+## 3 2012-11-01 288
+## 4 2012-11-04 288
+## 5 2012-11-09 288
+## 6 2012-11-10 288
+## 7 2012-11-14 288
+## 8 2012-11-30 288
+```
+
+```r
+# How many days data is there in total?
+length(unique(activity$date))
+```
+
+```
+## [1] 61
+```
+
+We find that all the NAs occur across eight days out of sixty one total.  For each of these eight days, NAs account for the entire day's data (24 x 60 / 5 = 288 samples per day). 
+
+Next, calculate the mean number of steps taken each day.  
 
 
 ```r
 activityPerDay <- activity %>%
   group_by(date) %>%
-  summarize(steps = sum(steps, na.rm = TRUE))
+  summarize(steps = sum(steps))
 head(activityPerDay)
 ```
 
@@ -47,7 +87,7 @@ head(activityPerDay)
 ## Source: local data frame [6 x 2]
 ## 
 ##         date steps
-## 1 2012-10-01     0
+## 1 2012-10-01    NA
 ## 2 2012-10-02   126
 ## 3 2012-10-03 11352
 ## 4 2012-10-04 12116
@@ -55,9 +95,9 @@ head(activityPerDay)
 ## 6 2012-10-06 15420
 ```
 
-Note that with this particular approach 10/1/2012 which had only NA entries is included in the calculation as having zero steps.
+Note that with this particular approach 10/1/2012 which had only NA entries is included in the results with NA steps.
 
-We then look at a histogram of the number of steps per day.  Visually, the 'typical' value appears to be around 10,000 steps in day, while there are 10 days with no steps recorded at all.
+We then look at a histogram of the number of steps per day.  Visually, the 'typical' value appears to be around 10,000 steps in day, while there are 2 days with no steps recorded at all.
 
 
 ```r
@@ -66,21 +106,22 @@ ggplot( activityPerDay, aes(steps) ) +
   xlab( "Total Number of Steps Per Day")
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
 
 
-We then calculate the mean and median steps per day, when NA values are not accounted for.
+Finally, we then calculate the mean and median steps per day, removing the NAs. Effectively, this is calculating the mean and median steps for the 53 (61 less 8) days for which there is a complete set of data.
 
 ```r
 activityPerDaySummary <- activityPerDay %>%
-  summarize(meanStepsPerDay = mean(steps), 
-            medianStepsPerDay = median(steps))
+  summarize(meanStepsPerDay = mean(steps, na.rm = TRUE), 
+            medianStepsPerDay = median(steps, na.rm = TRUE))
+
 sprintf("Mean steps per day is %.0f",
         activityPerDaySummary$meanStepsPerDay)
 ```
 
 ```
-## [1] "Mean steps per day is 9354"
+## [1] "Mean steps per day is 10766"
 ```
 
 ```r
@@ -89,7 +130,7 @@ sprintf("Median steps per day is  %.0f",
 ```
 
 ```
-## [1] "Median steps per day is  10395"
+## [1] "Median steps per day is  10765"
 ```
 ## What is the average daily activity pattern?
 
@@ -115,7 +156,7 @@ ggplot( activityDiurnal, aes(time, steps) ) + geom_line() +
   ggtitle("Average Daily Activity")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 A peak of activity is observed after 8am, while minimal activity occurs between the hours of midnight to 5:30am (approximately).
 
@@ -127,7 +168,7 @@ activityDiurnal$time[which.max(activityDiurnal$step)]
 ```
 
 ```
-## [1] "2015-08-15 08:35:00 GMT"
+## [1] "2015-09-16 08:35:00 GMT"
 ```
 
 ```r
@@ -165,7 +206,7 @@ for( i in 1:nrow(activity)) {
 
 activityPerDayImputed <- activityImputed %>%
   group_by(date) %>%
-  summarize(steps = sum(steps, na.rm = TRUE))
+  summarize(steps = sum(steps))
 head(activityPerDayImputed)
 ```
 
@@ -180,9 +221,9 @@ head(activityPerDayImputed)
 ## 5 2012-10-05 13294.00
 ## 6 2012-10-06 15420.00
 ```
-We see that 10/1/2012 now has a non-zero value for the number of steps  
+We see that 10/1/2012 now has a non-zero, non-NA value for the number of steps  
 
-Examining the histogram of the number of steps per day shows that there are far fewer days with zero steps (but some do remain). Visually, it appears that there is a greater number of days with more than 10,000 steps.
+Examining the histogram of the number of steps per day shows that, visually, it appears that there is now a greater number of days with more than 10,000 steps.
 
 
 ```r
@@ -191,9 +232,9 @@ ggplot( activityPerDayImputed, aes(steps) ) +
   xlab( "Total Number of Steps Per Day (after imputing missing data)")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
 
-Recalculating the mean and median steps per day after imputing missing values shows that both measures have been impacted.
+Recalculating the mean and median steps per day after imputing missing values shows that there is no change to the mean, and only a very small change to the calculated median value.
 
 
 ```r
@@ -206,7 +247,7 @@ sprintf("Mean steps per day is %.0f, (difference from non-imputed %.0f)",
 ```
 
 ```
-## [1] "Mean steps per day is 10766, (difference from non-imputed 1412)"
+## [1] "Mean steps per day is 10766, (difference from non-imputed 0)"
 ```
 
 ```r
@@ -216,11 +257,9 @@ sprintf("Median steps per day is %.0f, (difference from non-imputed %.0f)",
 ```
 
 ```
-## [1] "Median steps per day is 10766, (difference from non-imputed 371)"
+## [1] "Median steps per day is 10766, (difference from non-imputed 1)"
 ```
 
-
-There is a larger impact on the mean value than on the median value of steps per day, possibly related to the days for which only NAs were present in the data.  In the previous calculations where NAs were ignored the mean value would definitely have been reduced.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -245,7 +284,7 @@ ggplot( activityDiurnalImputed, aes(time, steps) ) + geom_line() + facet_grid( d
   ggtitle("Comparison of Average Daily Activity between Weekend and Weekdays")
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png) 
 
 The charts do indeed show a difference in profile between weekdays and weekends with a notable change at the weekend being a reduction in the peak of activity seen between 8am-9am on weekdays.
 
