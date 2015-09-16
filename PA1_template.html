@@ -280,9 +280,9 @@ head(activityPerDay)
 ## 6 2012-10-06 15420
 </code></pre>
 
-<p>Note that with this particular approach 10/1/2012 which had only NA entries is included in the results with NA steps.</p>
+<p>Note that with this particular approach 10/1/2012 which had only NA entries is included in the results at this stage, with NA steps.</p>
 
-<p>We then look at a histogram of the number of steps per day.  Visually, the &#39;typical&#39; value appears to be around 10,000 steps in day, while there are 2 days with no steps recorded at all.</p>
+<p>We then look at a histogram of the number of steps per day.  Visually, the &#39;typical&#39; value appears to be around 10,000 steps in day.</p>
 
 <pre><code class="r">ggplot( activityPerDay, aes(steps) ) + 
   geom_histogram(binwidth = 500) + 

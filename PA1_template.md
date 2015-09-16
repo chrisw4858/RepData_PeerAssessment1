@@ -95,9 +95,9 @@ head(activityPerDay)
 ## 6 2012-10-06 15420
 ```
 
-Note that with this particular approach 10/1/2012 which had only NA entries is included in the results with NA steps.
+Note that with this particular approach 10/1/2012 which had only NA entries is included in the results at this stage, with NA steps.
 
-We then look at a histogram of the number of steps per day.  Visually, the 'typical' value appears to be around 10,000 steps in day, while there are 2 days with no steps recorded at all.
+We then look at a histogram of the number of steps per day.  Visually, the 'typical' value appears to be around 10,000 steps in day.
 
 
 ```r
